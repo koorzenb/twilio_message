@@ -20,6 +20,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;koorzenb&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/koorzenb/twilio_message&quot;,
+    &quot;accountId&quot;: &quot;2b6b46e5-7ac6-488a-a85f-cf0961284a86&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0
 }</component>
@@ -71,14 +83,30 @@
       <option name="presentableId" value="Default" />
       <updated>1747254022251</updated>
       <workItem from="1747254023487" duration="6114000" />
-      <workItem from="1747306496174" duration="494000" />
+      <workItem from="1747306496174" duration="1596000" />
+      <workItem from="1747309244550" duration="2412000" />
+      <workItem from="1747328674695" duration="1183000" />
+      <workItem from="1747396973364" duration="1673000" />
     </task>
+    <task id="LOCAL-00001" summary="Sending BurnSafe messages">
+      <option name="closed" value="true" />
+      <created>1747308100467</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1747308100467</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Sending BurnSafe messages" />
+    <option name="LAST_COMMIT_MESSAGE" value="Sending BurnSafe messages" />
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/twilio_message$main.coverage" NAME="main Coverage Results" MODIFIED="1747261407756" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/twilio_message$main.coverage" NAME="main Coverage Results" MODIFIED="1747398436499" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
   </component>
 </project>

@@ -1,31 +1,25 @@
-import requests
-from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 import os
 from twilio.rest import Client
 import asyncio
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 
-async def get_website_html(url: str):
-    print(f'Fetching data from {url}...')
-
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        data = response.text
-        return BeautifulSoup(data, 'html.parser')
-    except Exception as error:
-        raise Exception(f"Error fetching data: {str(error)}")
+# async def get_website_html(url: str):
+#     print(f'Fetching data from {url}...')
+#
+#     try:
+#         response = requests.get(url)
+#         response.raise_for_status()
+#         data = response.text
+#         return BeautifulSoup(data, 'html.parser')
+#     except Exception as error:
+#         raise Exception(f"Error fetching data: {str(error)}")
 
 async def get_burn_safe_status() -> str | None:
-    try:
-        soup = await get_website_html('https://novascotia.ca/burnsafe/')
-        burn_safe_element = soup.select_one('tr#Halifax-County > td')
-        burn_safe_status = burn_safe_element.get('class')[0] if burn_safe_element and burn_safe_element.get(
-            'class') else None
-        print(f"BurnSafe Status: {burn_safe_status}")
-    except Exception as error:
-        burn_safe_status = None
-        print(f"Error: {str(error)}")
+    driver.get('https://novascotia.ca/burnsafe/')
+    burn_safe_element = driver.find_element(By.CSS_SELECTOR,'tr#Halifax-County > td')
+    burn_safe_status = burn_safe_element.get_attribute('class')
     burn_message = 'Aw... no burning today.'
 
     if burn_safe_status:
@@ -40,6 +34,7 @@ async def get_burn_safe_status() -> str | None:
 
 if __name__ == "__main__":
     def send_messages(messages):
+        global driver
         load_dotenv()
         account_sid = os.getenv('TWILIO_ACCOUNT_SID')
         auth_token = os.getenv('TWILIO_AUTH_TOKEN')
@@ -58,5 +53,7 @@ if __name__ == "__main__":
         messages += f"BurnSafe: {await get_burn_safe_status()}"
         send_messages(messages)
 
-
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--headless")
+    driver = webdriver.Chrome(options=chrome_options)
     asyncio.run(main())
