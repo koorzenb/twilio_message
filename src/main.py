@@ -53,6 +53,7 @@ if __name__ == "__main__":
 
         print(message)
 
+    # TODO: for pythonanywhere, remember to update .env
     async def main():
         messages = ''
         messages += f"BurnSafe: {await get_burn_safe_status()}"
