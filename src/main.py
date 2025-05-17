@@ -46,13 +46,12 @@ if __name__ == "__main__":
             to=os.getenv('MY_PHONE_NUMBER'),  # must be a verified number in your twilio account
         )
 
-        print(message)
-
     async def main():
         messages = ''
         messages += f"BurnSafe: {await get_burn_safe_status()}"
         send_messages(messages)
 
+    # TODO: if uploading to PythonAnywhere, remember to adjust .env file
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--headless")
     driver = webdriver.Chrome(options=chrome_options)
