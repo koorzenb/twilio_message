@@ -4,6 +4,7 @@ from twilio.rest import Client
 import asyncio
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+import os
 
 # async def get_website_html(url: str):
 #     print(f'Fetching data from {url}...')
@@ -43,7 +44,7 @@ if __name__ == "__main__":
         message = client.messages.create(
             body=messages,
             from_=os.getenv('TWILIO_PHONE_NUMBER'),
-            to=os.getenv('MY_PHONE_NUMBER'),  # must be a verified number in your twilio account
+            to=os.getenv('MY_PHONE_NUMBER') or '123',  # must be a verified number in your twilio account
         )
 
     async def main():
