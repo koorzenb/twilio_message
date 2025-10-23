@@ -31,16 +31,35 @@ This plan outlines the steps to refactor and improve the Twilio Message project,
 - [x] Add retry mechanisms for failed messages
 - [x] Update `main.py` to use the new Twilio client
 
+### 3. Create sponsor parents scraper module
+**Priority:** High  
+**Estimated Time:** 1.5 hours
+
+- [ ] Create scraping method for sponsor parents website. Use BeautifulSoup
+- [ ] Implement data extraction and parsing logic
+- [ ] Create method to check if the site has been updated
+- [ ] Return boolean value indicating update status
+- [ ] Add proper error handling for website structure changes
+- [ ] Implement caching mechanism for comparison data
+
+**Benefits:**
+- Dedicated scraper for sponsor parents monitoring
+- Efficient update detection without full re-scraping
+- Reusable methods for different scraping scenarios
+- Better separation of concerns
+
 ### 3. Migrate from Selenium to BeautifulSoup
 **Priority:** High  
 **Estimated Time:** 1 hour
 
-- [ ] Replace Selenium WebDriver with `requests` + `BeautifulSoup`
-- [ ] Update `get_burn_safe_status()` to use HTTP requests instead of browser automation
-- [ ] Remove ChromeDriver dependency and Chrome browser requirements
+- [ ] Add `requests` and `beautifulsoup4` to requirements.txt
+- [ ] Update `get_burn_safe_status()` to use `requests.get()` for HTTP requests
+- [ ] Replace Selenium element finding with BeautifulSoup parsing
+- [ ] Use BeautifulSoup selectors (CSS selectors or find methods) to locate elements
 - [ ] Add proper HTTP headers and user-agent strings for web scraping
 - [ ] Implement request retry logic and timeout handling
-- [ ] Test parsing with current website structure
+- [ ] Remove ChromeDriver dependency and Chrome browser requirements
+- [ ] Test parsing with current website structure using BeautifulSoup
 
 **Benefits:**
 - Reduced resource consumption (no browser overhead)
@@ -49,7 +68,7 @@ This plan outlines the steps to refactor and improve the Twilio Message project,
 - More reliable in headless environments
 - Lower memory footprint
 
-### 4. Implement proper logging system
+### 5. Implement proper logging system
 **Priority:** High  
 **Estimated Time:** 20 minutes
 
@@ -60,7 +79,7 @@ This plan outlines the steps to refactor and improve the Twilio Message project,
 
 ## Phase 2: Error Handling and Reliability
 
-### 5. Implement comprehensive error handling
+### 6. Implement comprehensive error handling
 **Priority:** High  
 **Estimated Time:** 1 hour
 
@@ -70,7 +89,7 @@ This plan outlines the steps to refactor and improve the Twilio Message project,
 - [ ] Create custom exception classes for project-specific errors
 - [ ] Add graceful degradation for non-critical failures
 
-### 6. Add WebDriver resource management
+### 7. Add WebDriver resource management
 **Priority:** High  
 **Estimated Time:** 45 minutes
 
@@ -80,7 +99,7 @@ This plan outlines the steps to refactor and improve the Twilio Message project,
 - [ ] Add retry logic for element location failures
 - [ ] Implement WebDriver session management
 
-### 7. Add input validation and sanitization
+### 8. Add input validation and sanitization
 **Priority:** Medium  
 **Estimated Time:** 30 minutes
 
@@ -91,7 +110,7 @@ This plan outlines the steps to refactor and improve the Twilio Message project,
 
 ## Phase 3: Testing Infrastructure
 
-### 8. Set up testing framework
+### 9. Set up testing framework
 **Priority:** High  
 **Estimated Time:** 1 hour
 
