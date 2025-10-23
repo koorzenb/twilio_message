@@ -1,7 +1,9 @@
 # Copilot Instructions for Twilio Message Project
 
+**FOR CODING AGENTS ONLY**: These instructions are specifically designed for AI coding agents (GitHub Copilot, Claude, etc.) working on this project. Human developers should refer to the project documentation and README files.
+
 ## Project Overview
-This is a Python-based automation tool that scrapes the Nova Scotia BurnSafe website and sends SMS notifications via Twilio. The project focuses on web scraping, API integration, and automated messaging.
+This is a Python-based automation tool that scrapes websites and sends SMS notifications via Twilio. The project focuses on web scraping, API integration, and automated messaging for important alerts and notifications.
 
 ## Python Programming Conventions
 
@@ -17,7 +19,7 @@ This is a Python-based automation tool that scrapes the Nova Scotia BurnSafe web
 ### Type Hints
 - Always use type hints for function parameters and return values
 - Use `from typing import` for complex types (List, Dict, Optional, Union)
-- Example: `def get_burn_status() -> str | None:`
+- Example: `def get_website_status() -> str | None:`
 - Use `Optional[Type]` or `Type | None` for nullable values
 
 ### Error Handling
@@ -48,21 +50,6 @@ except TwilioException as e:
 - Use meaningful environment variable names with project prefix
 - Example: `TWILIO_MESSAGE_ACCOUNT_SID`
 
-### Selenium Best Practices
-- Always use headless mode for production
-- Implement proper WebDriver cleanup with context managers
-- Use explicit waits instead of `time.sleep()`
-- Use specific selectors (CSS selectors preferred over XPath)
-- Handle `NoSuchElementException` and `TimeoutException`
-- Example:
-```python
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
-element = WebDriverWait(driver, 10).until(
-    EC.presence_of_element_located((By.CSS_SELECTOR, "tr#Halifax-County > td"))
-)
-```
 
 ### Logging
 - Use the `logging` module instead of `print()` statements
@@ -88,7 +75,7 @@ import pytest
 from unittest.mock import Mock, patch
 
 @patch('main.webdriver.Chrome')
-def test_get_burn_safe_status(mock_driver):
+def test_get_website_status(mock_driver):
     # Test implementation
     pass
 ```
@@ -99,12 +86,12 @@ def test_get_burn_safe_status(mock_driver):
 - Document exceptions that may be raised
 - Example:
 ```python
-async def get_burn_safe_status() -> str | None:
+async def get_website_status() -> str | None:
     """
-    Scrapes the Nova Scotia BurnSafe website for Halifax County burn status.
+    Scrapes a website for status information and returns a human-readable message.
     
     Returns:
-        str | None: A human-readable burn status message, or None if unable to determine status.
+        str | None: A human-readable status message, or None if unable to determine status.
         
     Raises:
         WebDriverException: If the web scraping fails.
@@ -137,7 +124,7 @@ src/
 ├── main.py
 ├── scrapers/
 │   ├── __init__.py
-│   └── burnafe_scraper.py
+│   └── website_scraper.py
 ├── notifications/
 │   ├── __init__.py
 │   └── twilio_client.py
@@ -215,11 +202,12 @@ def send_notification(message: str, recipient: str) -> bool:
 
 ## Project-Specific Guidelines
 
-### BurnSafe Scraping
+### Website Scraping
 - Always check for website structure changes
 - Implement fallback parsing strategies
 - Cache status to avoid unnecessary requests
 - Handle different status types explicitly
+- Use appropriate selectors for target websites
 
 ### Twilio Integration
 - Always verify phone numbers before deployment
@@ -233,4 +221,4 @@ def send_notification(message: str, recipient: str) -> bool:
 - Consider scheduling (cron jobs, task schedulers)
 - Implement health checks and monitoring
 
-Remember: This project handles real-world notifications that affect user safety decisions. Prioritize reliability, error handling, and thorough testing.
+Remember: This project handles real-world notifications that may affect user decisions. Prioritize reliability, error handling, and thorough testing.
