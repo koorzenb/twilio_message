@@ -25,11 +25,11 @@ This plan outlines the steps to refactor and improve the Twilio Message project,
 **Priority:** High  
 **Estimated Time:** 45 minutes
 
-- [ ] Create `src/notifications/twilio_client.py`
-- [ ] Extract SMS sending logic into a dedicated class
-- [ ] Implement proper error handling for Twilio API calls
-- [ ] Add retry mechanisms for failed messages
-- [ ] Update `main.py` to use the new Twilio client
+- [x] Create `src/notifications/twilio_client.py`
+- [x] Extract SMS sending logic into a dedicated class
+- [x] Implement proper error handling for Twilio API calls
+- [x] Add retry mechanisms for failed messages
+- [x] Update `main.py` to use the new Twilio client
 
 ### 3. Migrate from Selenium to BeautifulSoup
 **Priority:** High  
