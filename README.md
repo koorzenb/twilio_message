@@ -1,29 +1,58 @@
-# twilio_message
+# Twilio Message
 
-Scrapes websites for important info and forwards to phone
+Website monitoring system that detects changes and sends SMS notifications via Twilio.
 
-## Getting Started
+## Quick Start
 
-- Get a phone number from Twilio
-- Set up environment variables (.env) for Twilio credentials and phone numbers
-- Create a scraper using BeautifulSoup or Selenium
-- see run.bat for example usage
+1. **Get Twilio credentials** - Sign up at [twilio.com](https://twilio.com)
+2. **Set up environment** - Copy `.env.example` to `.env` and add your credentials
+3. **Install dependencies** - Run `pip install -r src/requirements.txt`
+4. **Run a scraper** - See commands below
 
 ## Available Scrapers
 
-### 1. BurnSafe Scraper (Nova Scotia)
+- **BurnSafe Scraper** - Nova Scotia burn restrictions
+- **Sponsor Parents Scraper** - Canada.ca immigration updates  
+- **Example Scraper** - Template for any website
 
-Monitors burn restrictions for Halifax County.
+## Creating Your Own Scraper
 
-### 2. Sponsor Parents Scraper (Canada.ca)
+```python
+from scrapers.base_website_scraper import BaseWebsiteScraper
+from bs4 import BeautifulSoup
+from typing import List
 
-Monitors the sponsor parents and grandparents immigration page for updates.
+class YourWebsiteScraper(BaseWebsiteScraper):
+    def __init__(self):
+        super().__init__(
+            base_url="https://example.com",
+            cache_file="your_cache.json",
+            history_file="your_history.json"
+        )
+    
+    def _extract_target_content(self, soup: BeautifulSoup) -> str:
+        # Extract the specific content you want to monitor
+        element = soup.select_one('.important-content')
+        return element.get_text(strip=True) if element else "Not found"
+    
+    def _extract_title(self, soup: BeautifulSoup) -> str:
+        title = soup.find('title')
+        return title.get_text(strip=True) if title else "No title"
+    
+    def _extract_main_content(self, soup: BeautifulSoup) -> str:
+        main = soup.find('main')
+        return main.get_text(strip=True)[:1000] if main else "No content"
+    
+    def _extract_important_notices(self, soup: BeautifulSoup) -> List[str]:
+        notices = []
+        for notice in soup.select('.alert, .notice'):
+            notices.append(notice.get_text(strip=True))
+        return notices
+```
 
 ## Running Scrapers
 
-### As Standalone Scripts
-
-#### Sponsor Parents Scraper
+### Sponsor Parents Scraper
 
 ```bash
 # Basic scraping (gets current website data)
@@ -34,22 +63,16 @@ python src/scrapers/sponsor_parents_scraper.py --action check-updates
 
 # View change history
 python src/scrapers/sponsor_parents_scraper.py --action history
-
-# View more history entries
-python src/scrapers/sponsor_parents_scraper.py --action history --history-limit 20
-
-# Use custom cache directory
-python src/scrapers/sponsor_parents_scraper.py --action scrape --cache-dir my_cache
 ```
 
-#### BurnSafe Scraper
+### BurnSafe Scraper
 
 ```bash
 # Run the main application (includes BurnSafe scraper + SMS notifications)
 python src/main.py
 ```
 
-### As Called Scripts (from main.py)
+### Import as Module
 
 ```python
 from scrapers.sponsor_parents_scraper import (
@@ -77,35 +100,6 @@ TWILIO_PHONE_NUMBER=your_twilio_phone_number
 MY_PHONE_NUMBER=your_recipient_phone_number
 ```
 
-## Installation
+---
 
-```bash
-# Install dependencies
-pip install -r src/requirements.txt
-
-# Or use the setup script
-run.bat
-```
-
-## Project Structure
-
-```text
-src/
-├── main.py                           # Main application entry point
-├── requirements.txt                  # Python dependencies
-├── scrapers/
-│   ├── burnafe_scraper.py            # Nova Scotia burn restrictions
-│   └── sponsor_parents_scraper.py    # Immigration sponsor parents monitoring
-└── notifications/
-    └── twilio_client.py              # SMS notifications via Twilio
-
-tests/
-├── test_main.py                      # Tests for main application
-├── test_burnafe_scraper.py           # Tests for burn safe scraper
-└── test_sponsor_scraper.py           # Tests for sponsor parents scraper
-
-data/                                 # Cache files (created automatically)
-├── sponsor_parents_cache.json        # Current website state
-├── backup_sponsor_parents_cache.json # Backup cache
-└── sponsor_parents_history.json      # Change history
-```
+📋 **For detailed technical documentation, architecture details, and development guidelines, see [PRD.md](PRD.md)**
