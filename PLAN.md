@@ -9,11 +9,11 @@ This plan outlines the steps to refactor and improve the Twilio Message project,
 **Priority:** High  
 **Estimated Time:** 30 minutes
 
-- [ ] Create `src/scrapers/burnafe_scraper.py`
-- [ ] Move the `get_burn_safe_status()` function to the new module
-- [ ] Add proper imports and dependencies
-- [ ] Update `main.py` to import from the new module
-- [ ] Ensure WebDriver instance is properly passed or managed
+- [x] Create `src/scrapers/burnafe_scraper.py`
+- [x] Move the `get_burn_safe_status()` function to the new module
+- [x] Add proper imports and dependencies
+- [x] Update `main.py` to import from the new module
+- [x] Ensure WebDriver instance is properly passed or managed
 
 **Benefits:**
 - Separation of concerns
