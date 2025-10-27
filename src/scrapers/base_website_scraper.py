@@ -134,18 +134,25 @@ class BaseWebsiteScraper(ABC):
         logger.error(f"Failed to scrape website after {max_retries} attempts: {last_exception}")
         return None
     
-    def check_for_updates(self) -> bool:
+    def check_for_updates(self, current_data: Optional[Dict[str, Any]] = None) -> bool:
         """
         Check if the website has been updated since last check.
+        
+        Args:
+            current_data: Optional pre-scraped website data. If None, will scrape automatically.
         
         Returns:
             bool: True if the site has been updated, False otherwise
         """
         try:
-            # Get current website data
-            current_data = self.scrape_website_data()
-            if not current_data:
-                logger.error("Failed to scrape current website data")
+            # Get current website data (scrape if not provided)
+            if current_data is None:
+                current_data = self.scrape_website_data()
+                if not current_data:
+                    logger.error("Failed to scrape current website data")
+                    return False
+            elif not isinstance(current_data, dict):
+                logger.error("Invalid current_data parameter: must be a dictionary")
                 return False
             
             # Load cached data

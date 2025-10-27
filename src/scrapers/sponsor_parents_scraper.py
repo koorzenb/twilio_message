@@ -145,15 +145,18 @@ def scrape_sponsor_parents_data() -> Optional[Dict[str, Any]]:
     return scraper.scrape_website_data()
 
 
-def check_sponsor_parents_updates() -> bool:
+def check_sponsor_parents_updates(current_data: Optional[Dict[str, Any]] = None) -> bool:
     """
     Convenience function to check for sponsor parents website updates.
+    
+    Args:
+        current_data: Optional pre-scraped website data. If None, will scrape automatically.
     
     Returns:
         bool: True if updates detected, False otherwise
     """
     scraper = SponsorParentsScraper()
-    return scraper.check_for_updates()
+    return scraper.check_for_updates(current_data)
 
 
 def get_sponsor_parents_history(limit: int = 10) -> List[Dict[str, Any]]:
