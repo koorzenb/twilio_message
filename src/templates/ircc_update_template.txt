@@ -1,0 +1,86 @@
+===============================================================================
+🍁 IRCC WEBSITE MONITOR - NOTIFICATION
+===============================================================================
+
+Immigration, Refugees and Citizenship Canada
+Status: {{status_text}}
+Timestamp: {{timestamp}}
+
+===============================================================================
+📊 UPDATE STATUS
+===============================================================================
+
+Website Update Detected: {{has_updates}}
+Check Performed: {{timestamp}}
+Monitoring URL: {{website_url}}
+Page Title: {{website_title}}
+
+===============================================================================
+📋 CURRENT WEBSITE DATA
+===============================================================================
+
+Page Title:         {{page_title}}
+Target Content:     {{target_content}}
+Last Updated:       {{last_updated}}
+Page Size:          {{page_size}} bytes
+Important Notices:  {{notices_count}} found
+
+===============================================================================
+{{#has_notices}}
+⚠️  IMPORTANT NOTICES
+===============================================================================
+
+{{#notices}}
+• {{.}}
+
+{{/notices}}
+===============================================================================
+{{/has_notices}}
+
+{{#show_history}}
+📈 RECENT CHANGES
+===============================================================================
+
+This notification was triggered because changes were detected on the IRCC 
+website. The system continuously monitors the target content for modifications.
+
+{{#history_available}}
+Recent Change History:
+{{#recent_history}}
+- {{timestamp}}: {{change_reason}} (Hash: {{content_hash}})
+{{/recent_history}}
+{{/history_available}}
+
+===============================================================================
+{{/show_history}}
+
+🎯 NEXT STEPS
+===============================================================================
+
+{{#has_updates}}
+ACTION REQUIRED: Please visit the IRCC website to review the latest updates. 
+Changes may include new announcements, updated procedures, or modified requirements.
+
+Website URL: {{website_url}}
+{{/has_updates}}
+{{^has_updates}}
+NO ACTION REQUIRED: This is a routine status check. No changes were detected 
+on the monitored website sections.
+{{/has_updates}}
+
+===============================================================================
+📧 NOTIFICATION DETAILS
+===============================================================================
+
+System: IRCC Website Monitor
+Type: Automated Notification
+Generated: {{timestamp}}
+Source: {{website_url}}
+
+This is an automated message. The system monitors specific sections of the 
+IRCC website for changes and sends notifications when updates are detected.
+
+For questions about this notification system, please check the project 
+documentation or contact the system administrator.
+
+===============================================================================

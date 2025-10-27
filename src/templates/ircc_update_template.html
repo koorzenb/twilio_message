@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <title>IRCC Website Update Notification</title>
+    <style>
+      /* Reset styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Base styles */
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f4f4f4;
+      }
+
+      /* Container */
+      .email-container {
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      /* Header */
+      .header {
+        background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+
+      .header .subtitle {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      /* Status badge */
+      .status-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin: 15px 0 10px 0;
+      }
+
+      .status-updated {
+        background-color: #28a745;
+        color: white;
+      }
+
+      .status-no-update {
+        background-color: #6c757d;
+        color: white;
+      }
+
+      .status-error {
+        background-color: #dc3545;
+        color: white;
+      }
+
+      /* Content */
+      .content {
+        padding: 30px 20px;
+      }
+
+      .section {
+        margin-bottom: 25px;
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #cc0000;
+        margin-bottom: 12px;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #ff0000;
+      }
+
+      /* Data table */
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+        font-size: 14px;
+      }
+
+      .data-table th {
+        background-color: #f8f9fa;
+        padding: 12px;
+        text-align: left;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        color: #495057;
+      }
+
+      .data-table td {
+        padding: 12px;
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: top;
+      }
+
+      .data-table tr:nth-child(even) {
+        background-color: #f8f9fa;
+      }
+
+      /* Highlight boxes */
+      .highlight-box {
+        background-color: #e7f3ff;
+        border-left: 4px solid #007bff;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 4px;
+      }
+
+      .highlight-box.success {
+        background-color: #d4edda;
+        border-left-color: #28a745;
+      }
+
+      .highlight-box.warning {
+        background-color: #fff3cd;
+        border-left-color: #ffc107;
+      }
+
+      .highlight-box.error {
+        background-color: #f8d7da;
+        border-left-color: #dc3545;
+      }
+
+      /* Notice list */
+      .notice-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .notice-item {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 4px;
+        padding: 12px;
+        margin: 8px 0;
+        position: relative;
+        padding-left: 40px;
+      }
+
+      .notice-item::before {
+        content: '⚠️';
+        position: absolute;
+        left: 12px;
+        top: 12px;
+      }
+
+      /* Footer */
+      .footer {
+        background-color: #f8f9fa;
+        padding: 20px;
+        text-align: center;
+        font-size: 12px;
+        color: #6c757d;
+        border-top: 1px solid #dee2e6;
+      }
+
+      .footer a {
+        color: #007bff;
+        text-decoration: none;
+      }
+
+      .footer a:hover {
+        text-decoration: underline;
+      }
+
+      /* Responsive design */
+      @media (max-width: 600px) {
+        .email-container {
+          margin: 10px;
+          border-radius: 0;
+        }
+
+        .header {
+          padding: 20px 15px;
+        }
+
+        .header h1 {
+          font-size: 20px;
+        }
+
+        .content {
+          padding: 20px 15px;
+        }
+
+        .data-table {
+          font-size: 12px;
+        }
+
+        .data-table th,
+        .data-table td {
+          padding: 8px;
+        }
+      }
+
+      /* Print styles */
+      @media print {
+        body {
+          background-color: white;
+        }
+
+        .email-container {
+          box-shadow: none;
+          margin: 0;
+        }
+
+        .header {
+          background: #cc0000 !important;
+          -webkit-print-color-adjust: exact;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <!-- Header -->
+      <div class="header">
+        <h1>🍁 IRCC Website Monitor</h1>
+        <p class="subtitle">Immigration, Refugees and Citizenship Canada</p>
+        <div class="status-badge status-{{status_class}}">{{status_text}}</div>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <!-- Update Status Section -->
+        <div class="section">
+          <h2 class="section-title">📊 Update Status</h2>
+          <div class="highlight-box {{update_highlight_class}}">
+            <strong>Website Update Detected:</strong> {{has_updates}}<br />
+            <strong>Check Performed:</strong> {{timestamp}}<br />
+            <strong>Monitoring URL:</strong>
+            <a
+              href="{{website_url}}"
+              target="_blank"
+              >{{website_title}}</a
+            >
+          </div>
+        </div>
+
+        <!-- Current Data Section -->
+        <div class="section">
+          <h2 class="section-title">📋 Current Website Data</h2>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Page Title</strong></td>
+                <td>{{page_title}}</td>
+              </tr>
+              <tr>
+                <td><strong>Target Content</strong></td>
+                <td>{{target_content}}</td>
+              </tr>
+              <tr>
+                <td><strong>Last Updated</strong></td>
+                <td>{{last_updated}}</td>
+              </tr>
+              <tr>
+                <td><strong>Page Size</strong></td>
+                <td>{{page_size}} bytes</td>
+              </tr>
+              <tr>
+                <td><strong>Important Notices</strong></td>
+                <td>{{notices_count}} found</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Important Notices Section (if any) -->
+        {{#has_notices}}
+        <div class="section">
+          <h2 class="section-title">⚠️ Important Notices</h2>
+          <ul class="notice-list">
+            {{#notices}}
+            <li class="notice-item">{{.}}</li>
+            {{/notices}}
+          </ul>
+        </div>
+        {{/has_notices}}
+
+        <!-- Change History Section (if updates detected) -->
+        {{#show_history}}
+        <div class="section">
+          <h2 class="section-title">📈 Recent Changes</h2>
+          <div class="highlight-box">
+            <p>
+              This notification was triggered because changes were detected on the IRCC website. The system continuously monitors the target content for
+              modifications.
+            </p>
+          </div>
+
+          {{#history_available}}
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Change Reason</th>
+                <th>Content Hash</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#recent_history}}
+              <tr>
+                <td>{{timestamp}}</td>
+                <td>{{change_reason}}</td>
+                <td><code>{{content_hash}}</code></td>
+              </tr>
+              {{/recent_history}}
+            </tbody>
+          </table>
+          {{/history_available}}
+        </div>
+        {{/show_history}}
+
+        <!-- Next Steps Section -->
+        <div class="section">
+          <h2 class="section-title">🎯 Next Steps</h2>
+          <div class="highlight-box">
+            {{#has_updates}}
+            <p>
+              <strong>Action Required:</strong> Please visit the
+              <a
+                href="{{website_url}}"
+                target="_blank"
+                >IRCC website</a
+              >
+              to review the latest updates. Changes may include new announcements, updated procedures, or modified requirements.
+            </p>
+            {{/has_updates}} {{^has_updates}}
+            <p><strong>No Action Required:</strong> This is a routine status check. No changes were detected on the monitored website sections.</p>
+            {{/has_updates}}
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>
+          <strong>IRCC Website Monitor</strong> | Automated Notification System<br />
+          Generated on {{timestamp}} |
+          <a
+            href="{{website_url}}"
+            target="_blank"
+            >View Source Website</a
+          >
+        </p>
+        <p style="margin-top: 10px; font-size: 11px">
+          This is an automated message. The system monitors specific sections of the IRCC website for changes and sends notifications when updates are detected.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
