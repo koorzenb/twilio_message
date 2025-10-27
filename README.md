@@ -55,11 +55,11 @@ class YourWebsiteScraper(BaseWebsiteScraper):
 ### Sponsor Parents Scraper
 
 ```bash
-# Basic scraping (gets current website data)
-python src/scrapers/sponsor_parents_scraper.py --action scrape
-
 # Check for updates (compares with cached data)
 python src/scrapers/sponsor_parents_scraper.py --action check-updates
+
+# Basic scraping (gets current website data)
+python src/scrapers/sponsor_parents_scraper.py --action scrape
 
 # View change history
 python src/scrapers/sponsor_parents_scraper.py --action history
