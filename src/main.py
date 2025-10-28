@@ -36,7 +36,6 @@ def _get_email_recipients() -> List[str]:
     
     return recipients
 
-
 def _send_email_notification() -> bool:
     """
     Send email notification with IRCC website update information.

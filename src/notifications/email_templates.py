@@ -260,14 +260,17 @@ class IRCCEmailTemplateRenderer:
             status_class = "updated"
             status_text = "UPDATE DETECTED"
             update_highlight_class = "success"
+            header_class = "update-detected"
         elif scraped_data is None:
             status_class = "error"
             status_text = "SCRAPING ERROR"
             update_highlight_class = "error"
+            header_class = "error"
         else:
             status_class = "no-update"
             status_text = "NO UPDATES"
             update_highlight_class = ""
+            header_class = "no-update"
         
         # Prepare context dictionary
         context = {
@@ -276,6 +279,7 @@ class IRCCEmailTemplateRenderer:
             'status_class': status_class,
             'status_text': status_text,
             'update_highlight_class': update_highlight_class,
+            'header_class': header_class,
             'timestamp': timestamp,
             
             # Website data
