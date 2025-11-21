@@ -360,6 +360,144 @@ def render_ircc_text_email(
     renderer = IRCCEmailTemplateRenderer()
     return renderer.render_update_notification(scraped_data, has_updates, recent_history, "text")
 
+class EmailTemplateRenderer:
+    """
+    Specialized template renderer for Xbox email notifications.
+    
+    Provides high-level methods for rendering Xbox-specific email templates
+    with proper context preparation and formatting.
+    """
+    
+    def __init__(self, template_dir: Optional[str] = None):
+        """
+        Initialize Xbox template renderer.
+        
+        Args:
+            template_dir: Optional custom template directory
+        """
+        if template_dir:
+            self.engine = TemplateEngine(template_dir)
+        else:
+            # Use default template directory relative to src directory
+            src_dir = Path(__file__).parent.parent
+            template_path = src_dir / "templates"
+            self.engine = TemplateEngine(str(template_path))
+    
+    def render_update_notification(
+        self, 
+        scraped_data: Dict[str, Any], 
+        has_updates: bool,
+        provider: str,
+        format_type: str = "html"
+    ) -> str:
+        f"""
+        Render an {provider} update notification email.
+        
+        Args:
+            scraped_data: Data scraped from the {provider} website
+            has_updates: Whether updates were detected
+            recent_history: Optional recent change history
+            format_type: Email format ('html' or 'text')
+            
+        Returns:
+            str: Rendered email content
+        """
+        # Prepare context
+        context = self._prepare_notification_context(scraped_data, has_updates, provider)
+        
+        # Select template
+        if format_type == "text":
+            template_name = "update_template.txt"
+        else:
+            template_name = f"update_template.{format_type}"
+        
+        return self.engine.render_template(template_name, context)
+    
+    def _prepare_notification_context(
+        self, 
+        scraped_data: Dict[str, Any], 
+        has_updates: bool,
+        provider: str
+    ) -> Dict[str, Any]:
+        """
+        Prepare template context from scraped data.
+        
+        Args:
+            scraped_data: Raw scraped data
+            has_updates: Whether updates were detected
+            recent_history: Optional change history
+            
+        Returns:
+            Dict[str, Any]: Template context
+        """
+        # Get current timestamp
+        now = datetime.now()
+        timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Extract basic data with safe defaults
+        page_title = scraped_data.get('title', 'N/A')
+        price = scraped_data.get('price', 'N/A')
+        
+        # Determine status information
+        if has_updates:
+            status_class = "updated"
+            status_text = "UPDATE DETECTED"
+            update_highlight_class = "success"
+            header_class = "update-detected"
+        elif scraped_data is None:
+            status_class = "error"
+            status_text = "SCRAPING ERROR"
+            update_highlight_class = "error"
+            header_class = "error"
+        else:
+            status_class = "no-update"
+            status_text = "NO UPDATES"
+            update_highlight_class = ""
+            header_class = "no-update"
+        
+        # Prepare context dictionary
+        context = {
+            # Status information
+            'has_updates': has_updates,
+            'status_class': status_class,
+            'status_text': status_text,
+            'update_highlight_class': update_highlight_class,
+            'header_class': header_class,
+            'timestamp': timestamp,
+            
+            # Website data
+            'website_url': scraped_data.get('url', 'https://www.amazon.ca'),
+            'website_title': f'{provider} Xbox Series S',
+            'provider': provider,
+            'page_title': page_title,
+            'price': price,
+        }
+        
+        # Format history entries if available        
+        return context
+
+
+
+def render_text_email(
+    scraped_data: Dict[str, Any], 
+    has_updates: bool,
+    recent_history: Optional[List[Dict[str, Any]]] = None
+) -> str:
+    """
+    Convenience function to render text email for Xbox notifications.
+    
+    Args:
+        scraped_data: Data scraped from the Xbox website
+        has_updates: Whether updates were detected
+        recent_history: Optional recent change history
+        
+    Returns:
+        str: Plain text email content
+    """
+    renderer = EmailTemplateRenderer()
+    return renderer.render_update_notification(scraped_data, has_updates, "text")
+
+
 
 if __name__ == "__main__":
     """Test the template engine when run as a standalone script."""
@@ -377,6 +515,7 @@ if __name__ == "__main__":
         'title': 'Sponsor your parents and grandparents - Canada.ca',
         'target_content': 'Date modified: 2025-10-27',
         'last_updated': '2025-10-27',
+        'price': '2025-10-27',
         'page_size': 45678,
         'important_notices': [
             'Important: The 2024 Parent and Grandparent Program intake is now closed.',

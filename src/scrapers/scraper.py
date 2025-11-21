@@ -1,4 +1,4 @@
-"""Sponsor Parents website scraper for monitoring updates."""
+"""Website scraper for monitoring updates."""
 
 import os
 import logging
@@ -17,21 +17,21 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class SponsorParentsScraper(BaseWebsiteScraper):
+class Scraper(BaseWebsiteScraper):
     """
-    A scraper for monitoring the Sponsor Parents website for updates.
+    A scraper for monitoring the website for updates.
     """
     
-    def __init__(self, cache_dir: str = "data", cache_file: str = "sponsor_parents_cache.json"):
+    def __init__(self, base_url: str, history_file: str,  cache_file: str, cache_dir: str = "data",):
         """
-        Initialize the Sponsor Parents scraper.
+        Initialize the scraper.
         
         Args:
+            base_url: The URL of the website to scrape
             cache_dir: Directory to store cache files (will be created if it doesn't exist)
             cache_file: Name of the cache file for storing comparison data
+            history_file: Name of the history file for storing change history
         """
-        base_url = "https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/family-sponsorship/sponsor-parents-grandparents.html"
-        history_file = "sponsor_parents_history.json"
         
         super().__init__(
             base_url=base_url,
@@ -113,39 +113,8 @@ class SponsorParentsScraper(BaseWebsiteScraper):
                     notices.append(text)
         
         return notices
-    
-    def _extract_last_updated(self, soup: BeautifulSoup) -> Optional[str]:
-        """Extract the last updated date if available."""
-        # Look for common "last updated" patterns specific to Canada.ca
-        update_selectors = [
-            '.last-updated',
-            '.date-modified',
-            '.updated',
-            '.modification-date',
-            'gcds-date-modified'  # Government of Canada Design System
-        ]
-        
-        for selector in update_selectors:
-            element = soup.select_one(selector)
-            if element:
-                return element.get_text(strip=True)
-        
-        return None
 
-
-# Convenience functions for easy usage
-def scrape_sponsor_parents_data() -> Optional[Dict[str, Any]]:
-    """
-    Convenience function to scrape sponsor parents website data.
-    
-    Returns:
-        Dict containing scraped data or None if scraping fails
-    """
-    scraper = SponsorParentsScraper()
-    return scraper.scrape_website_data()
-
-
-def check_sponsor_parents_updates(current_data: Optional[Dict[str, Any]] = None) -> bool:
+def check_updates(scraper: BaseWebsiteScraper, current_data: Optional[Dict[str, Any]] = None) -> bool:
     """
     Convenience function to check for sponsor parents website updates.
     
@@ -155,23 +124,7 @@ def check_sponsor_parents_updates(current_data: Optional[Dict[str, Any]] = None)
     Returns:
         bool: True if updates detected, False otherwise
     """
-    scraper = SponsorParentsScraper()
     return scraper.check_for_updates(current_data)
-
-
-def get_sponsor_parents_history(limit: int = 10) -> List[Dict[str, Any]]:
-    """
-    Convenience function to get sponsor parents website change history.
-    
-    Args:
-        limit: Maximum number of history entries to return
-        
-    Returns:
-        List of historical change entries
-    """
-    scraper = SponsorParentsScraper()
-    return scraper.get_change_history(limit)
-
 
 def main():
     """Main function for running the scraper as a standalone script."""
@@ -208,13 +161,15 @@ def main():
     try:
         if args.action == 'scrape':
             print("Scraping sponsor parents website...")
-            scraper = SponsorParentsScraper(cache_dir=args.cache_dir)
+            base_url = "https://www.amazon.ca/s?k=xbox+series+s&crid=2UH8F14M7IDR9&sprefix=xbox+series+s%2Caps%2C1027&ref=nb_sb_noss_1"
+            history_file = "xbox_amazon_history.json"
+            scraper = Scraper(base_url=base_url, history_file=history_file, cache_dir=args.cache_dir, cache_file="xbox_cache.json")
             data = scraper.scrape_website_data()
             
             if data:
                 print("Scraping successful!")
                 print(f"Title: {data.get('title', 'N/A')}")
-                print(f"Target content: {data.get('target_content', 'N/A')}")
+                print(f"Price: {data.get('price', 'N/A')}")
                 print(f"URL: {data.get('url', 'N/A')}")
                 print(f"Page size: {data.get('page_size', 'N/A')} bytes")
                 print(f"Important notices: {len(data.get('important_notices', []))} found")
@@ -227,37 +182,6 @@ def main():
             else:
                 print("Scraping failed!")
                 sys.exit(1)
-                
-        elif args.action == 'check-updates':
-            print("Checking for updates...")
-            scraper = SponsorParentsScraper(cache_dir=args.cache_dir)
-            has_updates = scraper.check_for_updates()
-            
-            if has_updates:
-                print("Updates detected!")
-                # Show the latest entry from history
-                history = scraper.get_change_history(1)
-                if history:
-                    entry = history[0]
-                    print(f"Timestamp: {entry.get('timestamp', 'N/A')}")
-                    print(f"Target content: {entry.get('target_content', 'N/A')}")
-                    print(f"Reason: {entry.get('change_reason', 'N/A')}")
-            else:
-                print("No updates detected")
-                
-        elif args.action == 'history':
-            print(f"Showing last {args.history_limit} history entries...")
-            scraper = SponsorParentsScraper(cache_dir=args.cache_dir)
-            history = scraper.get_change_history(args.history_limit)
-            
-            if history:
-                for i, entry in enumerate(history, 1):
-                    print(f"\n{i}. {entry.get('timestamp', 'N/A')}")
-                    print(f"   Target content: {entry.get('target_content', 'N/A')}")
-                    print(f"   Reason: {entry.get('change_reason', 'N/A')}")
-                    print(f"   Page size: {entry.get('page_size', 'N/A')} bytes")
-            else:
-                print("No history entries found")
                 
     except KeyboardInterrupt:
         print("\nOperation cancelled by user")

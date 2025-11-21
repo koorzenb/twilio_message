@@ -51,14 +51,23 @@ class BaseWebsiteScraper(ABC):
         self.backup_file = os.path.join(self.cache_dir, f"backup_{cache_file}")
         self.history_file = os.path.join(self.cache_dir, history_file)
         
-        # Set up HTTP headers with defaults
+        # Set up HTTP headers with defaults (updated for better Amazon compatibility)
         default_headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate, br',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br, zstd',
+            'DNT': '1',
             'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1'
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Cache-Control': 'max-age=0',
+            'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"'
         }
         if headers:
             default_headers.update(headers)
@@ -103,7 +112,8 @@ class BaseWebsiteScraper(ABC):
                     'main_content': self._extract_main_content(soup),
                     'important_notices': self._extract_important_notices(soup),
                     'last_updated': self._extract_last_updated(soup),
-                    'page_size': len(response.content)
+                    'page_size': len(response.content),
+                    'price': self.extract_price(soup),                    
                 }
                 
                 # Allow subclasses to add additional data
@@ -251,6 +261,20 @@ class BaseWebsiteScraper(ABC):
     def _extract_important_notices(self, soup: BeautifulSoup) -> List[str]:
         """Extract important notices or alerts from the page."""
         pass
+    
+    def extract_price(self, soup: BeautifulSoup) -> Optional[str]:
+        """Extract price information from the page."""
+        update_selectors = [
+            'div > span > div > div > div.a-section.a-spacing-small.puis-padding-left-small.puis-padding-right-small > div.a-section.a-spacing-none.a-spacing-top-small.s-price-instructions-style > div:nth-child(2) > div:nth-child(1) > a > span > span:nth-child(2) > span.a-price-whole',
+            "div > div:nth-child(1) > div > div > div:nth-child(2) > span.b.lh-copy.dark-gray.f1.mr2 > span.inline-flex.flex-column > span"
+        ]
+        
+        for selector in update_selectors:
+            element = soup.select_one(selector)
+            if element:
+                return element.get_text(strip=True)
+        
+        return None
     
     # Optional methods that subclasses can override
     def _extract_last_updated(self, soup: BeautifulSoup) -> Optional[str]:

@@ -1,3 +1,10 @@
 {
-	"python-envs.pythonProjects": []
+	"python-envs.pythonProjects": [],
+	"cSpell.words": [
+		"dotenv",
+		"ircc",
+		"levelname",
+		"Tahoma",
+		"Verdana"
+	]
 }

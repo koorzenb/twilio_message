@@ -8,6 +8,7 @@ This is a Python-based automation tool that scrapes websites and sends SMS notif
 ## Python Programming Conventions
 
 ### Code Style & Formatting
+- Always start with TDD.
 - Follow **PEP 8** style guidelines strictly
 - Use **4 spaces** for indentation (no tabs)
 - Maximum line length of **88 characters** (Black formatter standard)
