@@ -107,7 +107,7 @@ def send_email_update() -> bool:
     recipients = _get_email_recipients()
     from datetime import datetime
     if datetime.now().weekday() == 4:  # 4 corresponds to Friday
-        ircc_scraper = Scraper(base_url="https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/family-sponsorship/sponsor", history_file="sponsor_parents_history.json", cache_file="sponsor_parents_cache.json")
+        ircc_scraper = Scraper(base_url="https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/family-sponsorship/sponsor-parents-grandparents.html", history_file="sponsor_parents_history.json", cache_file="sponsor_parents_cache.json")
         return _scrape_data(scraper=ircc_scraper, provider="IRCC", recipients=[recipients[0], recipients[1]])
     else:
         amazon_scraper = Scraper(base_url="https://www.amazon.ca/s?k=xbox+series+s&crid=2UH8F14M7IDR9&sprefix=xbox+series+s%2Caps%2C1027&ref=nb_sb_noss_1", history_file="xbox_amazon_history.json", cache_file="xbox_amazon_cache.json")
