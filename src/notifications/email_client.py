@@ -98,7 +98,7 @@ class EmailSMTPClient:
             username=os.getenv('EMAIL_USERNAME', ''),
             password=os.getenv('EMAIL_PASSWORD', ''),
             sender_email=os.getenv('SENDER_EMAIL', ''),
-            sender_name=os.getenv('SENDER_NAME', 'IRCC Website Monitor'),
+            sender_name=os.getenv('SENDER_NAME', 'Website Monitor'),
             use_tls=use_tls,
             use_ssl=os.getenv('SMTP_USE_SSL', 'false').lower() == 'true'
         )

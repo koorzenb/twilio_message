@@ -110,11 +110,8 @@ def send_email_update() -> bool:
         ircc_scraper = Scraper(base_url="https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/family-sponsorship/sponsor-parents-grandparents.html", history_file="sponsor_parents_history.json", cache_file="sponsor_parents_cache.json")
         return _scrape_data(scraper=ircc_scraper, provider="IRCC", recipients=[recipients[0], recipients[1]])
     else:
-        amazon_scraper = Scraper(base_url="https://www.amazon.ca/s?k=xbox+series+s&crid=2UH8F14M7IDR9&sprefix=xbox+series+s%2Caps%2C1027&ref=nb_sb_noss_1", history_file="xbox_amazon_history.json", cache_file="xbox_amazon_cache.json")
-        _scrape_data(amazon_scraper, provider="Amazon", recipients=[recipients[0], recipients[2]])
-        walmart_scraper = Scraper(base_url="https://www.walmart.ca/en/ip/Xbox-Series-S-All-Digital-Gaming-Console-512GB-SSD-Includes-Xbox-Wireless-Controller-120FPS-Robot-White/7IY33NVWJOKP?classType=REGULAR&athbdg=L1102&from=/search", history_file="xbox_walmart_history.json", cache_file="xbox_walmart_cache.json")
-        return _scrape_data(walmart_scraper, provider="Walmart", recipients=[recipients[0], recipients[2]])
-
+        return False
+    
 if __name__ == "__main__":
     def main():
         """Main application entry point."""
