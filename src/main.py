@@ -107,10 +107,11 @@ def send_email_update() -> bool:
     recipients = _get_email_recipients()
     from datetime import datetime
     if datetime.now().weekday() == 4:  # 4 corresponds to Friday
-        ircc_scraper = Scraper(base_url="https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/family-sponsorship/sponsor-parents-grandparents.html", history_file="sponsor_parents_history.json", cache_file="sponsor_parents_cache.json")
+        ircc_scraper = Scraper(base_url="https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/family-sponsorship/sponsor-parents-grandparents.html", target_element='body > main > section > gcds-date-modified', history_file="sponsor_parents_history.json", cache_file="sponsor_parents_cache.json")
         return _scrape_data(scraper=ircc_scraper, provider="IRCC", recipients=[recipients[0], recipients[1]])
-    else:
-        return False
+    # else:
+    #     display_monitor_scraper = Scraper(base_url="https://www.walmart.ca/en/ip/LG-27-FHD-IPS-3-Side-Borderless-Monitor-with-AMD/1457XYBFE7ZU", target_element='span.b.lh-copy.dark-gray.f1.mr2 > span.inline-flex.flex-column > span', history_file="display_history.json", cache_file="display_cache.json")
+    #     return _scrape_data(scraper=display_monitor_scraper, provider="Walmart", recipients=[recipients[0]])
     
 if __name__ == "__main__":
     def main():
@@ -118,7 +119,7 @@ if __name__ == "__main__":
         # Load environment variables
         load_dotenv()
         
-        logger.info("=== IRCC Website Monitor Started ===")
+        logger.info("=== Website Monitors Started ===")
         
         # Validate email configuration
         try:
@@ -142,14 +143,14 @@ if __name__ == "__main__":
             
             if success:
                 print("✅ Email notification sent successfully!")
-                logger.info("=== IRCC Website Monitor Completed Successfully ===")
+                logger.info("=== Website Monitor Completed Successfully ===")
             else:
                 print("❌ Failed to send email notification")
-                logger.error("=== IRCC Website Monitor Failed ===")
+                logger.error("=== Website Monitor Failed ===")
                 
         except Exception as e:
             print(f"❌ Unexpected error: {e}")
             logger.error(f"Unexpected error in main: {e}")
-            logger.error("=== IRCC Website Monitor Failed ===")
+            logger.error("=== Website Monitor Failed ===")
 
     main()

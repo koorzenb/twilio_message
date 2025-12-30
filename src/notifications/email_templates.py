@@ -467,7 +467,7 @@ class EmailTemplateRenderer:
             
             # Website data
             'website_url': scraped_data.get('url', 'https://www.amazon.ca'),
-            'website_title': f'{provider} Xbox Series S',
+            'website_title': f'{provider}',
             'provider': provider,
             'page_title': page_title,
             'price': price,

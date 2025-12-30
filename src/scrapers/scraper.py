@@ -22,7 +22,7 @@ class Scraper(BaseWebsiteScraper):
     A scraper for monitoring the website for updates.
     """
     
-    def __init__(self, base_url: str, history_file: str,  cache_file: str, cache_dir: str = "data",):
+    def __init__(self, base_url: str, target_element: str, history_file: str,  cache_file: str, cache_dir: str = "data",):
         """
         Initialize the scraper.
         
@@ -35,6 +35,7 @@ class Scraper(BaseWebsiteScraper):
         
         super().__init__(
             base_url=base_url,
+            target_element=target_element,
             cache_dir=cache_dir,
             cache_file=cache_file,
             history_file=history_file
@@ -44,23 +45,15 @@ class Scraper(BaseWebsiteScraper):
     
     def _extract_target_content(self, soup: BeautifulSoup) -> str:
         """Extract the specific target content we're monitoring for changes."""
-        # Use the exact selector: body > main > section > gcds-date-modified
-        target_element = soup.select_one('body > main > section > gcds-date-modified')
+        element = soup.select_one(self.target_element)
         
-        if target_element:
-            content = target_element.get_text(strip=True)
+        if element:
+            content = element.get_text(strip=True)
             logger.info(f"Target content found: {content}")
             return content
         else:
-            # Fallback: try to find gcds-date-modified anywhere on the page
-            fallback_element = soup.select_one('gcds-date-modified')
-            if fallback_element:
-                content = fallback_element.get_text(strip=True)
-                logger.info(f"Target content found (fallback): {content}")
-                return content
-            else:
-                logger.warning("Target content (gcds-date-modified) not found")
-                return "Target content not found"
+            logger.warning(f"Target content ({self.target_element}) not found")
+            return "Target content not found"
     
     def _extract_title(self, soup: BeautifulSoup) -> str:
         """Extract the page title."""
@@ -163,7 +156,7 @@ def main():
             print("Scraping sponsor parents website...")
             base_url = "https://www.amazon.ca/s?k=xbox+series+s&crid=2UH8F14M7IDR9&sprefix=xbox+series+s%2Caps%2C1027&ref=nb_sb_noss_1"
             history_file = "xbox_amazon_history.json"
-            scraper = Scraper(base_url=base_url, history_file=history_file, cache_dir=args.cache_dir, cache_file="xbox_cache.json")
+            scraper = Scraper(base_url=base_url, target_element='body', history_file=history_file, cache_dir=args.cache_dir, cache_file="xbox_cache.json")
             data = scraper.scrape_website_data()
             
             if data:

@@ -25,6 +25,7 @@ class BaseWebsiteScraper(ABC):
     def __init__(
         self, 
         base_url: str,
+        target_element: str,
         cache_dir: str = "data", 
         cache_file: str = "website_cache.json",
         history_file: str = "website_history.json",
@@ -41,6 +42,7 @@ class BaseWebsiteScraper(ABC):
             headers: Custom HTTP headers for requests
         """
         self.base_url = base_url
+        self.target_element = target_element
         
         # Create cache directory if it doesn't exist
         self.cache_dir = cache_dir
