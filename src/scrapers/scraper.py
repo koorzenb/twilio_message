@@ -22,7 +22,7 @@ class Scraper(BaseWebsiteScraper):
     A scraper for monitoring the website for updates.
     """
     
-    def __init__(self, base_url: str, target_element: str, history_file: str,  cache_file: str, cache_dir: str = "data",):
+    def __init__(self, base_url: str, target_element: str, history_file: str,  cache_file: str, cache_dir: str = "data", use_selenium: bool = False):
         """
         Initialize the scraper.
         
@@ -31,6 +31,7 @@ class Scraper(BaseWebsiteScraper):
             cache_dir: Directory to store cache files (will be created if it doesn't exist)
             cache_file: Name of the cache file for storing comparison data
             history_file: Name of the history file for storing change history
+            use_selenium: Whether to use Selenium instead of Requests
         """
         
         super().__init__(
@@ -38,7 +39,8 @@ class Scraper(BaseWebsiteScraper):
             target_element=target_element,
             cache_dir=cache_dir,
             cache_file=cache_file,
-            history_file=history_file
+            history_file=history_file,
+            use_selenium=use_selenium
         )
     
     # Implementation of abstract methods from BaseWebsiteScraper

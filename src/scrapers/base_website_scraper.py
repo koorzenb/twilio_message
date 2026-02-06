@@ -9,6 +9,9 @@ from typing import Optional, Dict, Any, List, Callable
 from bs4 import BeautifulSoup
 from datetime import datetime
 from abc import ABC, abstractmethod
+import time
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +32,8 @@ class BaseWebsiteScraper(ABC):
         cache_dir: str = "data", 
         cache_file: str = "website_cache.json",
         history_file: str = "website_history.json",
-        headers: Optional[Dict[str, str]] = None
+        headers: Optional[Dict[str, str]] = None,
+        use_selenium: bool = False
     ):
         """
         Initialize the website scraper.
@@ -40,9 +44,11 @@ class BaseWebsiteScraper(ABC):
             cache_file: Name of the cache file for storing comparison data
             history_file: Name of the history file for storing change records
             headers: Custom HTTP headers for requests
+            use_selenium: Whether to use Selenium instead of Requests for scraping
         """
         self.base_url = base_url
         self.target_element = target_element
+        self.use_selenium = use_selenium
         
         # Create cache directory if it doesn't exist
         self.cache_dir = cache_dir
@@ -54,30 +60,58 @@ class BaseWebsiteScraper(ABC):
         self.history_file = os.path.join(self.cache_dir, history_file)
         
         # Set up HTTP headers with defaults (updated for better Amazon compatibility)
+        # Using simpler headers to avoid WAF fingerprinting (ConnectionResetError on canada.ca)
         default_headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
             'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br, zstd',
-            'DNT': '1',
+            'Accept-Encoding': 'gzip, deflate',
             'Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-User': '?1',
             'Cache-Control': 'max-age=0',
-            'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"'
         }
         if headers:
             default_headers.update(headers)
         
         self.headers = default_headers
         self.session = requests.Session()
-        self.session.headers.update(self.headers)
+        return self.session
         
+    def _fetch_with_selenium(self) -> str:
+        """
+        Fetch website content using Selenium WebDriver.
+        
+        Returns:
+            str: The page source HTML
+            
+        Raises:
+            Exception: If scraping fails
+        """
+        options = Options()
+        options.add_argument("--headless")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument(f"user-agent={self.headers['User-Agent']}")
+        
+        driver = None
+        try:
+            logger.info("Initializing Selenium WebDriver...")
+            driver = webdriver.Chrome(options=options)
+            driver.set_page_load_timeout(30)
+            
+            logger.info("Fetching page with Selenium...")
+            driver.get(self.base_url)
+            
+            # Allow some time for dynamic content to load
+            time.sleep(3)
+            
+            return driver.page_source
+            
+        finally:
+            if driver:
+                driver.quit()
+
     def scrape_website_data(self, timeout: int = 30, max_retries: int = 3) -> Optional[Dict[str, Any]]:
         """
         Scrape the website for relevant data.
@@ -98,23 +132,31 @@ class BaseWebsiteScraper(ABC):
             try:
                 logger.info(f"Scraping website {self.base_url} (attempt {attempt + 1}/{max_retries})")
                 
-                response = self.session.get(self.base_url, timeout=timeout)
-                response.raise_for_status()
+                content = None
+                status_code = 200
+
+                if self.use_selenium:
+                    content = self._fetch_with_selenium()
+                else:
+                    response = self.session.get(self.base_url, timeout=timeout)
+                    response.raise_for_status()
+                    content = response.content
+                    status_code = response.status_code
                 
-                soup = BeautifulSoup(response.content, 'html.parser')
+                soup = BeautifulSoup(content, 'html.parser')
                 
                 # Extract key information from the website using abstract methods
                 scraped_data = {
                     'url': self.base_url,
                     'scraped_at': datetime.now().isoformat(),
-                    'status_code': response.status_code,
+                    'status_code': status_code,
                     'target_content': self._extract_target_content(soup),
                     'target_content_hash': self._generate_target_content_hash(soup),
                     'title': self._extract_title(soup),
                     'main_content': self._extract_main_content(soup),
                     'important_notices': self._extract_important_notices(soup),
                     'last_updated': self._extract_last_updated(soup),
-                    'page_size': len(response.content),
+                    'page_size': len(content),
                     'price': self.extract_price(soup),                    
                 }
                 
@@ -129,6 +171,13 @@ class BaseWebsiteScraper(ABC):
             except requests.exceptions.Timeout as e:
                 last_exception = e
                 logger.warning(f"Timeout on attempt {attempt + 1}: {e}")
+
+            except (requests.exceptions.ConnectionError, ConnectionResetError) as e:
+                last_exception = e
+                logger.warning(f"Connection error on attempt {attempt + 1}: {e}")
+                # Create a new session on connection errors to avoid reusing broken connections
+                self.session = requests.Session()
+                self.session.headers.update(self.headers)
                 
             except requests.exceptions.RequestException as e:
                 last_exception = e
