@@ -29,6 +29,7 @@ This will:
 - 🎨 **Professional Design**: Clean, responsive layout with Canadian government styling
 - 📊 **Structured Data**: Organized tables and sections for easy reading
 - 🚨 **Status Indicators**: Color-coded badges and highlights for different update states
+- 🧭 **Concise Change Comparison**: Side-by-side before/after table for changed sections only
 - 📱 **Mobile Responsive**: Optimized for both desktop and mobile viewing
 - ⚠️ **Important Notices**: Highlighted sections for critical information
 - 📈 **Change History**: Timeline of recent updates when changes are detected

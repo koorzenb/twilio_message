@@ -47,7 +47,8 @@ def _scrape_data(scraper: Scraper, provider: str, recipients: List[str]) -> bool
             return False
         
         # Check for updates using the scraped data
-        has_updates = scraper.check_for_updates(scraped_data)
+        update_result = scraper.check_for_updates_with_details(scraped_data)
+        has_updates = bool(update_result.get("has_updates", False))
         
         # Get email recipients
         if not recipients:
@@ -58,7 +59,13 @@ def _scrape_data(scraper: Scraper, provider: str, recipients: List[str]) -> bool
         logger.info("Generating email content...")
         
         renderer = EmailTemplateRenderer()
-        html_content = renderer.render_update_notification(scraped_data, has_updates, provider, "html")
+        html_content = renderer.render_update_notification(
+            scraped_data=scraped_data,
+            has_updates=has_updates,
+            provider=provider,
+            change_summary=update_result,
+            format_type="html",
+        )
 
         
         # Determine email subject
@@ -108,7 +115,7 @@ def send_email_update() -> bool:
     from datetime import datetime
     if datetime.now().weekday() == 4:  # 4 corresponds to Friday
         ircc_scraper = Scraper(base_url="https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/family-sponsorship/sponsor-parents-grandparents.html", target_element='body > main > section > gcds-date-modified', history_file="sponsor_parents_history.json", cache_file="sponsor_parents_cache.json", use_selenium=True)
-        return _scrape_data(scraper=ircc_scraper, provider="IRCC", recipients=[recipients[0], recipients[1]])
+        return _scrape_data(scraper=ircc_scraper, provider="IRCC", recipients=recipients)
     # else:
     #     display_monitor_scraper = Scraper(base_url="https://www.walmart.ca/en/ip/LG-27-FHD-IPS-3-Side-Borderless-Monitor-with-AMD/1457XYBFE7ZU", target_element='span.b.lh-copy.dark-gray.f1.mr2 > span.inline-flex.flex-column > span', history_file="display_history.json", cache_file="display_cache.json")
     #     return _scrape_data(scraper=display_monitor_scraper, provider="Walmart", recipients=[recipients[0]])

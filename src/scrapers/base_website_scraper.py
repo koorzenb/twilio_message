@@ -205,16 +205,43 @@ class BaseWebsiteScraper(ABC):
         Returns:
             bool: True if the site has been updated, False otherwise
         """
+        update_result = self.check_for_updates_with_details(current_data)
+        return bool(update_result.get("has_updates", False))
+
+    def check_for_updates_with_details(
+        self, current_data: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Check for updates and return structured change details.
+
+        Args:
+            current_data: Optional pre-scraped website data. If None, will scrape automatically.
+
+        Returns:
+            Dict[str, Any]: Update result with change metadata and before/after details.
+        """
         try:
             # Get current website data (scrape if not provided)
             if current_data is None:
                 current_data = self.scrape_website_data()
                 if not current_data:
                     logger.error("Failed to scrape current website data")
-                    return False
+                    return {
+                        "has_updates": False,
+                        "is_first_run": False,
+                        "change_reason": None,
+                        "changed_sections": [],
+                        "previous_data": None,
+                    }
             elif not isinstance(current_data, dict):
                 logger.error("Invalid current_data parameter: must be a dictionary")
-                return False
+                return {
+                    "has_updates": False,
+                    "is_first_run": False,
+                    "change_reason": None,
+                    "changed_sections": [],
+                    "previous_data": None,
+                }
             
             # Load cached data
             cached_data = self._load_cached_data()
@@ -223,23 +250,47 @@ class BaseWebsiteScraper(ABC):
             if not cached_data:
                 logger.info("No cached data found, treating as first run (update detected)")
                 self._save_cached_data(current_data)
-                return True
+                return {
+                    "has_updates": True,
+                    "is_first_run": True,
+                    "change_reason": "Initial baseline established",
+                    "changed_sections": [],
+                    "previous_data": None,
+                }
             
-            # Check for changes using the comparison strategy
-            change_reason = self._detect_changes(current_data, cached_data)
+            changed_sections = self._collect_changed_sections(current_data, cached_data)
+            change_reason = changed_sections[0]["summary"] if changed_sections else None
             
             if change_reason:
                 logger.info(f"Changes detected: {change_reason}")
                 self._save_cached_data(current_data)
                 self._add_to_history(current_data, change_reason)
-                return True
+                return {
+                    "has_updates": True,
+                    "is_first_run": False,
+                    "change_reason": change_reason,
+                    "changed_sections": changed_sections,
+                    "previous_data": cached_data,
+                }
             
             logger.info(f"No updates detected on {self.base_url}")
-            return False
+            return {
+                "has_updates": False,
+                "is_first_run": False,
+                "change_reason": None,
+                "changed_sections": [],
+                "previous_data": cached_data,
+            }
             
         except Exception as e:
             logger.error(f"Error checking for updates: {e}")
-            return False
+            return {
+                "has_updates": False,
+                "is_first_run": False,
+                "change_reason": None,
+                "changed_sections": [],
+                "previous_data": None,
+            }
     
     def _detect_changes(self, current_data: Dict[str, Any], cached_data: Dict[str, Any]) -> Optional[str]:
         """
@@ -252,26 +303,68 @@ class BaseWebsiteScraper(ABC):
         Returns:
             String describing the change if detected, None otherwise
         """
+        changed_sections = self._collect_changed_sections(current_data, cached_data)
+        if changed_sections:
+            return changed_sections[0]["summary"]
+
+        return None
+
+    def _collect_changed_sections(
+        self, current_data: Dict[str, Any], cached_data: Dict[str, Any]
+    ) -> List[Dict[str, str]]:
+        """
+        Collect section-level before/after changes between current and cached data.
+
+        Args:
+            current_data: Current scraped data
+            cached_data: Previously cached data
+
+        Returns:
+            List[Dict[str, str]]: Changed sections with summaries and before/after values.
+        """
+        changed_sections: List[Dict[str, str]] = []
+
         # Compare target content hashes (most reliable)
         current_target_hash = current_data.get('target_content_hash')
         cached_target_hash = cached_data.get('target_content_hash')
         
         if current_target_hash != cached_target_hash:
-            return "Target content changed"
+            changed_sections.append(
+                {
+                    "section": "Target Content",
+                    "summary": "Target content changed",
+                    "before": str(cached_data.get("target_content", "N/A")),
+                    "after": str(current_data.get("target_content", "N/A")),
+                }
+            )
         
         # Compare important notices
         current_notices = current_data.get('important_notices', [])
         cached_notices = cached_data.get('important_notices', [])
         
         if current_notices != cached_notices:
-            return "Important notices changed"
+            changed_sections.append(
+                {
+                    "section": "Important Notices",
+                    "summary": "Important notices changed",
+                    "before": "\n".join(cached_notices) if cached_notices else "No notices",
+                    "after": "\n".join(current_notices) if current_notices else "No notices",
+                }
+            )
         
         # Allow subclasses to implement additional change detection
         additional_changes = self._detect_additional_changes(current_data, cached_data)
         if additional_changes:
-            return additional_changes
-        
-        return None
+            changed_sections.append(
+                {
+                    "section": "Additional Checks",
+                    "summary": additional_changes,
+                    "before": "N/A",
+                    "after": "N/A",
+                }
+            )
+
+        return changed_sections
     
     def get_change_history(self, limit: int = 10) -> List[Dict[str, Any]]:
         """

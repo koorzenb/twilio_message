@@ -284,6 +284,27 @@
           </div>
         </div>
 
+        {{#has_change_details}}
+        <div class="section">
+          <h2 class="section-title">🧭 What Changed ({{change_details_count}})</h2>
+          <div class="highlight-box warning">
+            <strong>Summary:</strong> Only high-signal sections are shown below for readability.
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Section</th>
+                <th>Before</th>
+                <th>After</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{change_details_table_rows}}
+            </tbody>
+          </table>
+        </div>
+        {{/has_change_details}}
+
         <!-- Current Data Section -->
         <div class="section">
           <h2 class="section-title">📋 Current Website Data</h2>

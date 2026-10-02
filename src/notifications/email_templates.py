@@ -6,6 +6,7 @@ import logging
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 from pathlib import Path
+from html import escape
 
 logger = logging.getLogger(__name__)
 
@@ -388,6 +389,7 @@ class EmailTemplateRenderer:
         scraped_data: Dict[str, Any], 
         has_updates: bool,
         provider: str,
+        change_summary: Optional[Dict[str, Any]] = None,
         format_type: str = "html"
     ) -> str:
         f"""
@@ -396,14 +398,19 @@ class EmailTemplateRenderer:
         Args:
             scraped_data: Data scraped from the {provider} website
             has_updates: Whether updates were detected
-            recent_history: Optional recent change history
+            change_summary: Optional structured update details
             format_type: Email format ('html' or 'text')
             
         Returns:
             str: Rendered email content
         """
         # Prepare context
-        context = self._prepare_notification_context(scraped_data, has_updates, provider)
+        context = self._prepare_notification_context(
+            scraped_data=scraped_data,
+            has_updates=has_updates,
+            provider=provider,
+            change_summary=change_summary,
+        )
         
         # Select template
         if format_type == "text":
@@ -417,7 +424,8 @@ class EmailTemplateRenderer:
         self, 
         scraped_data: Dict[str, Any], 
         has_updates: bool,
-        provider: str
+        provider: str,
+        change_summary: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Prepare template context from scraped data.
@@ -425,7 +433,7 @@ class EmailTemplateRenderer:
         Args:
             scraped_data: Raw scraped data
             has_updates: Whether updates were detected
-            recent_history: Optional change history
+            change_summary: Optional structured update details
             
         Returns:
             Dict[str, Any]: Template context
@@ -471,10 +479,77 @@ class EmailTemplateRenderer:
             'provider': provider,
             'page_title': page_title,
             'price': price,
+            'has_change_details': False,
+            'change_details_table_rows': "",
+            'change_details_count': 0,
         }
-        
-        # Format history entries if available        
+
+        changed_sections = self._extract_changed_sections(change_summary)
+        if changed_sections:
+            context["has_change_details"] = True
+            context["change_details_table_rows"] = self._render_change_details_rows(
+                changed_sections
+            )
+            context["change_details_count"] = len(changed_sections)
+
         return context
+
+    def _extract_changed_sections(
+        self, change_summary: Optional[Dict[str, Any]]
+    ) -> List[Dict[str, str]]:
+        """Extract changed sections from update metadata."""
+        if not change_summary:
+            return []
+
+        sections = change_summary.get("changed_sections")
+        if not isinstance(sections, list):
+            return []
+
+        return [section for section in sections if isinstance(section, dict)]
+
+    def _render_change_details_rows(self, sections: List[Dict[str, str]]) -> str:
+        """Render concise before/after rows for changed sections."""
+        max_sections = 4
+        rows: List[str] = []
+        limited_sections = sections[:max_sections]
+
+        for section in limited_sections:
+            section_name = self._truncate_for_display(
+                str(section.get("section", "Unknown section")), max_length=60
+            )
+            summary = self._truncate_for_display(
+                str(section.get("summary", "Updated")), max_length=140
+            )
+            before_value = self._truncate_for_display(
+                str(section.get("before", "N/A")), max_length=320
+            )
+            after_value = self._truncate_for_display(
+                str(section.get("after", "N/A")), max_length=320
+            )
+            rows.append(
+                "<tr>"
+                f"<td><strong>{escape(section_name)}</strong><br/><small>{escape(summary)}</small></td>"
+                f"<td>{escape(before_value)}</td>"
+                f"<td>{escape(after_value)}</td>"
+                "</tr>"
+            )
+
+        if len(sections) > max_sections:
+            rows.append(
+                "<tr>"
+                "<td colspan=\"3\"><em>Additional changes were detected. "
+                "Open the source page for full context.</em></td>"
+                "</tr>"
+            )
+
+        return "".join(rows)
+
+    def _truncate_for_display(self, value: str, max_length: int) -> str:
+        """Normalize and trim long values for readable email comparisons."""
+        normalized = " ".join(value.split())
+        if len(normalized) <= max_length:
+            return normalized
+        return f"{normalized[: max_length - 3]}..."
 
 
 
